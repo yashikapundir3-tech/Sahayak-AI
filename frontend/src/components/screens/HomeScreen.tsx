@@ -6,12 +6,13 @@ import { ApiService } from '../../services/api';
 import { Mic, Sparkles, FileCheck, BookOpen, HandMetal, Compass, ArrowRight, Zap } from 'lucide-react';
 
 export const HomeScreen: React.FC = () => {
-  const { twin, setActiveScreen, speakIfEnabled } = useTwin();
+  const { twin, setActiveScreen, speakIfEnabled, theme } = useTwin();
   const [isListening, setIsListening] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<string>('');
   const [detectedIntent, setDetectedIntent] = useState<string | null>(null);
 
-  const isHC = twin.visual.highContrast;
+  const isHC = theme === 'contrast' || twin.visual.highContrast;
+  const isDark = theme === 'dark';
   const isHindi = twin.language === 'Hindi';
 
   const defaultStatus = isHindi
@@ -117,18 +118,20 @@ export const HomeScreen: React.FC = () => {
         className={`p-3.5 rounded-2xl cursor-pointer transition-all border ${
           isHC
             ? 'bg-neutral-900 border-[#FFD700] text-[#FFD700]'
+            : isDark
+            ? 'bg-gradient-to-r from-blue-950/70 via-indigo-950/60 to-slate-900/90 border-blue-500/30 text-slate-100 shadow-[0_8px_25px_rgba(0,0,0,0.4)] hover:border-blue-400/60'
             : 'bg-gradient-to-r from-blue-50/90 to-indigo-50/90 border-blue-200/80 shadow-sm hover:shadow-md'
         }`}
       >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Sparkles size={17} className={isHC ? 'text-[#FFD700]' : 'text-blue-600'} />
+            <Sparkles size={17} className={isHC ? 'text-[#FFD700]' : 'text-blue-400'} />
             <span className="text-xs font-black tracking-wider uppercase">
               {isHindi ? 'सुलभता प्रोफ़ाइल सक्रिय' : 'ACCESSIBILITY TWIN ACTIVE'}
             </span>
           </div>
           <span className={`text-[11px] font-semibold flex items-center gap-1 ${
-            isHC ? 'text-[#FFD700]' : 'text-blue-600'
+            isHC ? 'text-[#FFD700]' : 'text-blue-400'
           }`}>
             {isHindi ? 'बदलें' : 'Edit'} <ArrowRight size={12} />
           </span>
@@ -137,27 +140,27 @@ export const HomeScreen: React.FC = () => {
         {/* Feature Preference Chips */}
         <div className="flex flex-wrap gap-1.5">
           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-            isHC ? 'bg-[#FFD700] text-black' : 'bg-blue-600 text-white'
+            isHC ? 'bg-[#FFD700] text-black' : 'bg-blue-600 text-white shadow-sm'
           }`}>
             {twin.language}
           </span>
           {twin.motor.voiceInput && (
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-              isHC ? 'border border-[#FFD700]' : 'bg-white text-slate-700 border border-slate-200'
+              isHC ? 'border border-[#FFD700]' : isDark ? 'bg-slate-800/80 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200'
             }`}>
               {isHindi ? 'आवाज़ प्राथमिकता' : 'Voice First'}
             </span>
           )}
           {twin.comprehension.oneStepAtATime && (
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-              isHC ? 'border border-[#FFD700]' : 'bg-white text-slate-700 border border-slate-200'
+              isHC ? 'border border-[#FFD700]' : isDark ? 'bg-slate-800/80 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200'
             }`}>
               {isHindi ? 'एक समय में एक चरण' : '1-Step-at-a-Time'}
             </span>
           )}
           {twin.comprehension.simplifiedLanguage && (
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-              isHC ? 'border border-[#FFD700]' : 'bg-white text-slate-700 border border-slate-200'
+              isHC ? 'border border-[#FFD700]' : isDark ? 'bg-slate-800/80 text-slate-200 border border-slate-700' : 'bg-white text-slate-700 border border-slate-200'
             }`}>
               {isHindi ? 'सरल भाषा' : 'Simplified'}
             </span>
