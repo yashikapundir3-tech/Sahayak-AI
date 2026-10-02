@@ -10,6 +10,9 @@ interface TwinContextType {
   toggleHighContrast: () => void;
   toggleLargeText: () => void;
   setLanguage: (lang: 'Hindi' | 'English') => void;
+  theme: 'dark' | 'light' | 'contrast';
+  setTheme: (theme: 'dark' | 'light' | 'contrast') => void;
+  toggleTheme: () => void;
   activeScreen: string;
   setActiveScreen: (screen: string) => void;
   deviceMode: 'frame' | 'fullscreen';
@@ -66,6 +69,14 @@ export const TwinProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return defaultTwin;
   });
 
+  const [theme, setThemeState] = useState<'dark' | 'light' | 'contrast'>(() => {
+    try {
+      const savedTheme = localStorage.getItem('sahayak_theme') as 'dark' | 'light' | 'contrast';
+      if (savedTheme) return savedTheme;
+    } catch (_) {}
+    return 'dark'; // Dark Mode by default
+  });
+
   const [activeScreen, setActiveScreen] = useState<string>('home');
   const [deviceMode, setDeviceMode] = useState<'frame' | 'fullscreen'>('frame');
   const [backendStatus, setBackendStatus] = useState<'FastAPI' | 'LocalEngine'>('LocalEngine');
@@ -77,6 +88,27 @@ export const TwinProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  const setTheme = (newTheme: 'dark' | 'light' | 'contrast') => {
+    HapticsService.tactileClick();
+    setThemeState(newTheme);
+    try {
+      localStorage.setItem('sahayak_theme', newTheme);
+    } catch (_) {}
+
+    // Update twin highContrast visual flag if contrast is selected
+    if (newTheme === 'contrast') {
+      setTwin(prev => ({ ...prev, visual: { ...prev.visual, highContrast: true } }));
+    } else if (twin.visual.highContrast) {
+      setTwin(prev => ({ ...prev, visual: { ...prev.visual, highContrast: false } }));
+    }
+  };
+
+  const toggleTheme = () => {
+    if (theme === 'dark') setTheme('light');
+    else if (theme === 'light') setTheme('contrast');
+    else setTheme('dark');
+  };
+
   const updateTwin = (newTwin: AccessibilityTwin) => {
     HapticsService.tactileClick();
     setTwin(newTwin);
@@ -86,15 +118,11 @@ export const TwinProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleHighContrast = () => {
-    HapticsService.tactileClick();
-    const updated = {
-      ...twin,
-      visual: {
-        ...twin.visual,
-        highContrast: !twin.visual.highContrast,
-      },
-    };
-    updateTwin(updated);
+    if (theme === 'contrast') {
+      setTheme('dark');
+    } else {
+      setTheme('contrast');
+    }
   };
 
   const toggleLargeText = () => {
@@ -136,6 +164,9 @@ export const TwinProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleHighContrast,
         toggleLargeText,
         setLanguage,
+        theme,
+        setTheme,
+        toggleTheme,
         activeScreen,
         setActiveScreen,
         deviceMode,

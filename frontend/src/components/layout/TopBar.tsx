@@ -1,10 +1,12 @@
 import React from 'react';
 import { useTwin } from '../../context/TwinContext';
-import { Contrast, Volume2, VolumeX, Smartphone, Monitor, Globe } from 'lucide-react';
+import { Contrast, Volume2, VolumeX, Smartphone, Monitor, Globe, Moon, Sun } from 'lucide-react';
 
 export const TopBar: React.FC = () => {
   const {
     twin,
+    theme,
+    toggleTheme,
     toggleHighContrast,
     toggleLargeText,
     setLanguage,
@@ -15,7 +17,8 @@ export const TopBar: React.FC = () => {
     stopSpeaking,
   } = useTwin();
 
-  const isHC = twin.visual.highContrast;
+  const isHC = theme === 'contrast' || twin.visual.highContrast;
+  const isDark = theme === 'dark';
   const isHindi = twin.language === 'Hindi';
   const isAudioOn = twin.comprehension.readInstructionsAloud;
 
@@ -36,11 +39,13 @@ export const TopBar: React.FC = () => {
     <header className={`w-full transition-colors ${
       isHC 
         ? 'bg-black text-[#FFD700] border-b-2 border-[#FFD700]' 
+        : isDark
+        ? 'bg-slate-900/95 backdrop-blur-md text-slate-100 border-b border-slate-800'
         : 'bg-white/95 backdrop-blur-md text-slate-800 border-b border-slate-200'
     }`}>
       {/* Mobile OS Status Bar Simulator */}
       <div className={`px-5 pt-2 pb-1 flex items-center justify-between text-[11px] font-semibold tracking-wider ${
-        isHC ? 'text-[#FFD700]' : 'text-slate-500'
+        isHC ? 'text-[#FFD700]' : isDark ? 'text-slate-400' : 'text-slate-500'
       }`}>
         <span>09:41</span>
         <div className="flex items-center gap-1.5">
@@ -68,18 +73,18 @@ export const TopBar: React.FC = () => {
           <div>
             <h1 className={`font-extrabold tracking-tight leading-none ${
               twin.visual.largeText ? 'text-lg' : 'text-base'
-            } ${isHC ? 'text-[#FFD700]' : 'text-slate-900'}`}>
+            } ${isHC ? 'text-[#FFD700]' : isDark ? 'text-white' : 'text-slate-900'}`}>
               {isHindi ? 'सहायक AI' : 'SAHAYAK AI'}
             </h1>
             <span className={`text-[10px] font-medium leading-none block mt-0.5 ${
-              isHC ? 'text-white' : 'text-slate-500'
+              isHC ? 'text-white' : isDark ? 'text-slate-400' : 'text-slate-500'
             }`}>
               Accessibility Copilot
             </span>
           </div>
         </div>
 
-        {/* Quick Accessibility Toggles */}
+        {/* Quick Accessibility & Theme Toggles */}
         <div className="flex items-center gap-1">
           {/* Audio Guidance Toggle */}
           <button
@@ -88,25 +93,27 @@ export const TopBar: React.FC = () => {
             aria-label="Toggle voice guidance"
             className={`p-2 rounded-lg transition-transform active:scale-95 ${
               isAudioOn
-                ? isHC ? 'bg-[#FFD700] text-black' : 'bg-blue-100 text-blue-700'
-                : isHC ? 'text-[#FFD700] hover:bg-neutral-800' : 'text-slate-500 hover:bg-slate-100'
+                ? isHC ? 'bg-[#FFD700] text-black' : 'bg-blue-600 text-white'
+                : isHC ? 'text-[#FFD700] hover:bg-neutral-800' : isDark ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
             {isAudioOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
 
-          {/* High Contrast Toggle */}
+          {/* 3-Way Theme Switcher Button */}
           <button
-            onClick={toggleHighContrast}
-            title="Toggle High Contrast (WCAG AAA)"
-            aria-label="Toggle High Contrast"
-            className={`p-2 rounded-lg transition-transform active:scale-95 ${
-              isHC
+            onClick={toggleTheme}
+            title={`Current Theme: ${theme.toUpperCase()} (Click to toggle)`}
+            aria-label="Toggle Theme (Dark / Light / High Contrast)"
+            className={`p-2 rounded-lg transition-transform active:scale-95 flex items-center gap-1 text-xs font-bold ${
+              theme === 'contrast'
                 ? 'bg-[#FFD700] text-black ring-2 ring-black'
-                : 'text-slate-600 hover:bg-slate-100'
+                : theme === 'dark'
+                ? 'bg-slate-800 text-amber-400 hover:bg-slate-700'
+                : 'bg-slate-100 text-indigo-600 hover:bg-slate-200'
             }`}
           >
-            <Contrast size={18} />
+            {theme === 'dark' ? <Moon size={18} /> : theme === 'contrast' ? <Contrast size={18} /> : <Sun size={18} />}
           </button>
 
           {/* Text Size Scale Toggle */}
